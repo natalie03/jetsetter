@@ -1,56 +1,28 @@
 import React, { Component } from 'react';
-import uniqueId from 'lodash/uniqueId';
 import CountDown from './CountDown';
 import NewItem from './NewItem';
 import Items from './Items';
 
 import './Application.css';
 
-const defaultState = [
-  { value: 'Pants', id: uniqueId(), packed: false },
-  { value: 'Jacket', id: uniqueId(), packed: false },
-  { value: 'iPhone Charger', id: uniqueId(), packed: false },
-  { value: 'MacBook', id: uniqueId(), packed: false },
-  { value: 'Sleeping Pills', id: uniqueId(), packed: true },
-  { value: 'Underwear', id: uniqueId(), packed: false },
-  { value: 'Hat', id: uniqueId(), packed: false },
-  { value: 'T-Shirts', id: uniqueId(), packed: false },
-  { value: 'Belt', id: uniqueId(), packed: false },
-  { value: 'Passport', id: uniqueId(), packed: true },
-  { value: 'Sandwich', id: uniqueId(), packed: true },
-];
+import ItemStore from '../ItemStore';
 
 class Application extends Component {
   state = {
-    items: defaultState
+    items: ItemStore.getItems(),
   };
 
-  // How are we going to manipulate the state?
-  // Ideally, users are going to want to add, remove,
-  // and check off items, right?
-
-  addItem = (item) => {
-    this.setState({ items: [item, ...this.state.items] })
+  updateItems = () => {
+    const items = ItemStore.getItems();
+    this.setState({ items });
   }
 
-  removeItem = (itemToRemove) => {
-    this.setState({ items: this.state.items.filter(item => item.id !== itemToRemove.id) })
+  componentDidMount() {
+    ItemStore.on('change', this.updateItems);
   }
 
-  toggleItem = (itemToToggle) => {
-      const items = this.state.items.map(item => {
-        if (item.id !== itemToToggle.id) return item;
-        return { ...itemToToggle, packed: !itemToToggle.packed}
-      });
-      this.setState({ items });
-  }
-
-  markAllAsUnpacked = () => {
-    const items = this.state.items.map(item => {
-        return { ...item, packed: false}
-      });
-      this.setState({ items });
-
+  componentWillUnmount() {
+    ItemStore.off('change', this.updateItems);
   }
 
   render() {
@@ -60,11 +32,10 @@ class Application extends Component {
 
     return (
       <div className="Application">
-        <NewItem onSubmit={this.addItem} />
+        <NewItem />
         <CountDown />
-        <Items title="Unpacked Items" items={unpackedItems} onRemove={this.removeItem} onToggle={this.toggleItem} />
-        <Items title="Packed Items" items={packedItems} onRemove={this.removeItem} onToggle={this.toggleItem} />
-        <button className="button full-width" onClick={this.markAllAsUnpacked}>Mark All As Unpacked</button>
+        <Items title="Unpacked Items" items={unpackedItems} />
+        <Items title="Packed Items" items={packedItems} />
       </div>
     );
   }
