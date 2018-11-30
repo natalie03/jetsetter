@@ -15,7 +15,11 @@ const items = [
 ];
 
 export default {
-  items,
+  items: {
+    past: [],
+    present: items,
+    future: []
+  },
   filter: {
     packedItemsFilter: '',
     unpackedItemsFilter: '',
